@@ -44,7 +44,7 @@ def long_division(dividend, divider):
         current_dividend = 0
         pos_of_next_digit = 0
 
-        current_dividend, pos_of_next_digit = get_next_divedend(
+        current_dividend, pos_of_next_digit = get_next_dividend(
             current_dividend,
             digits_of_dividend,
             divider,
@@ -94,7 +94,7 @@ def change_shift1(digits_of_dividend, length_of_current_dividend, pos_of_next_di
     return shift1
 
 
-def get_next_divedend(current_dividend, digits_of_dividend, divider, pos_of_next_digit):
+def get_next_dividend(current_dividend, digits_of_dividend, divider, pos_of_next_digit):
     while current_dividend < divider and pos_of_next_digit < len(digits_of_dividend):
         current_dividend = current_dividend * 10 + digits_of_dividend[pos_of_next_digit]
         pos_of_next_digit += 1
