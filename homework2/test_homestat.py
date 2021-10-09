@@ -92,7 +92,6 @@ class TestStatistics(unittest.TestCase):
         alls = t.extract_general(self._stat)
         males = t.extract_general_male(self._stat)
         females = t.extract_general_female(self._stat)
-        common = set([n[0] for n in males]) & set([n[0] for n in females])
 
         self.assertEqual(len(alls), len(males) + len(females))
         self.assertSubSequence(males, alls)
@@ -109,7 +108,6 @@ class TestStatistics(unittest.TestCase):
             self.assertSubSequence(females, alls)
 
     def testCorrectSex(self):
-        fdsgbdg = t.extract_general_male(self._stat)
         self.assertSubSequence(
             (('Дмитрий', 36), ('Илья', 19), ('Игорь', 12), ('Роман', 8),
              ('Кирилл', 7), ('Никита', 5), ('Лёва', 1), ('Алехандро', 1)),
