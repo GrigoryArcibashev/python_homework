@@ -24,23 +24,33 @@ def extract_general(stat):
     (имя, количество) общей статистики для всех имён.
     Список должен быть отсортирован по убыванию количества.
     """
-    return get_frequency_of_names_for_years_in_descending_order(stat, stat.keys())
+    return get_frequency_of_names_for_years_in_descending_order(
+        stat,
+        stat.keys())
 
 
-def get_frequency_of_names_for_years_in_descending_order(stat, years, male_names=True, female_names=True):
+def get_frequency_of_names_for_years_in_descending_order(
+        stat,
+        years,
+        male_names=True,
+        female_names=True):
     def is_sex_female(sex):
         return not sex
 
     name_counter = dict()
     for year in years:
         for name in stat[year]:
-            if not ((male_names and not is_sex_female(name[1])) or (female_names and is_sex_female(name[1]))):
+            if not (male_names and not is_sex_female(name[1])) \
+                    and not (female_names and is_sex_female(name[1])):
                 continue
             try:
                 name_counter[name[0]] += 1
             except KeyError:
                 name_counter[name[0]] = 1
-    return sorted(list(name_counter.items()), key=lambda pair: pair[1], reverse=True)
+    return sorted(
+        list(name_counter.items()),
+        key=lambda pair: pair[1],
+        reverse=True)
 
 
 def extract_general_male(stat):
@@ -49,7 +59,10 @@ def extract_general_male(stat):
     (имя, количество) общей статистики для имён мальчиков.
     Список должен быть отсортирован по убыванию количества.
     """
-    return get_frequency_of_names_for_years_in_descending_order(stat, stat.keys(), female_names=False)
+    return get_frequency_of_names_for_years_in_descending_order(
+        stat,
+        stat.keys(),
+        female_names=False)
 
 
 def extract_general_female(stat):
@@ -58,7 +71,10 @@ def extract_general_female(stat):
     (имя, количество) общей статистики для имён девочек.
     Список должен быть отсортирован по убыванию количества.
     """
-    return get_frequency_of_names_for_years_in_descending_order(stat, stat.keys(), male_names=False)
+    return get_frequency_of_names_for_years_in_descending_order(
+        stat,
+        stat.keys(),
+        male_names=False)
 
 
 def extract_year(stat, year):
@@ -78,7 +94,10 @@ def extract_year_male(stat, year):
     имён мальчиков в указанном году.
     Список должен быть отсортирован по убыванию количества.
     """
-    return get_frequency_of_names_for_years_in_descending_order(stat, [year], female_names=False)
+    return get_frequency_of_names_for_years_in_descending_order(
+        stat,
+        [year],
+        female_names=False)
 
 
 def extract_year_female(stat, year):
@@ -88,7 +107,10 @@ def extract_year_female(stat, year):
     имён девочек в указанном году.
     Список должен быть отсортирован по убыванию количества.
     """
-    return get_frequency_of_names_for_years_in_descending_order(stat, [year], male_names=False)
+    return get_frequency_of_names_for_years_in_descending_order(
+        stat,
+        [year],
+        male_names=False)
 
 
 def get_html_code(url):
@@ -128,20 +150,25 @@ def parse_html_code(html_code):
 def is_sex_male(last_name, first_name):
     """
     Возвращает:
-        0, если пол мужской,
-        1, если пол женский
+        True, если пол мужской,
+        False, если пол женский
     """
     male_endings_for_last_name = ('ов', 'ев', 'ёв', 'ын', 'ин', 'ский', 'цкий')
-    male_endings_for_first_name = ('ёва', 'ий', 'рь', 'ман', 'рилл', 'дро', 'ег', 'он', 'ел', 'фей', 'ндр', 'ий',
-                                   'ил', 'ей', 'ём', 'тор', 'ис', 'ван', 'дим', 'сей', 'лав', 'еб', 'сим', 'лай')
+    male_endings_for_first_name = ('ёва', 'ий', 'рь', 'ман', 'рилл', 'дро',
+                                   'ег', 'он', 'ел', 'фей', 'ндр', 'ий', 'ил',
+                                   'ей', 'ём', 'тор', 'ис', 'ван', 'дим',
+                                   'сей', 'лав', 'еб', 'сим', 'лай')
     is_last_name_male = False
     for ending in male_endings_for_last_name:
-        if len(last_name) >= len(ending) and last_name[-len(ending):] == ending:
+        if len(last_name) >= len(ending) \
+                and last_name[-len(ending):] == ending:
             is_last_name_male = True
             break
+
     is_first_name_male = False
     for ending in male_endings_for_first_name:
-        if len(first_name) >= len(ending) and first_name[-len(ending):] == ending:
+        if len(first_name) >= len(ending) \
+                and first_name[-len(ending):] == ending:
             is_first_name_male = True
             break
     return is_last_name_male or is_first_name_male
