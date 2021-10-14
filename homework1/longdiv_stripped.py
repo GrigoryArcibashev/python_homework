@@ -51,20 +51,27 @@ def long_division(dividend, divider):
             pos_of_next_digit)
 
         remainder_of_division = current_dividend % divider
-        length_of_current_dividend = len(get_digits_of_number(current_dividend))
-        result_of_dividing_current_dividend = current_dividend - remainder_of_division
-        # shift2 = {длина current_dividend} - {длина result_of_dividing_current_dividend}
+        length_of_current_dividend = len(
+            get_digits_of_number(current_dividend))
+        result_of_dividing_current_dividend = \
+            current_dividend - remainder_of_division
+        # shift2 = {длина current_dividend}
+        #           - {длина result_of_dividing_current_dividend}
         # shift3 = {длина dividend} - shift1 - {длина current_dividend}
-        shift2 = length_of_current_dividend - len(get_digits_of_number(result_of_dividing_current_dividend))
-        shift3 = len(get_digits_of_number(dividend)) - shift1 - length_of_current_dividend
+        shift2 = length_of_current_dividend - len(
+            get_digits_of_number(result_of_dividing_current_dividend))
+        shift3 = len(get_digits_of_number(
+            dividend)) - shift1 - length_of_current_dividend
 
         if result_of_dividing_current_dividend > 0:
             if first_iteration:
                 first_iteration = False
             else:
-                result.append(' ' * shift1 + str(current_dividend) + ' ' * shift3 + '|\n')
+                result.append(' ' * shift1 + str(
+                    current_dividend) + ' ' * shift3 + '|\n')
         if result_of_dividing_current_dividend > 0:
-            result.append(' ' * (shift1 + shift2) + str(result_of_dividing_current_dividend) + ' ' * shift3 + '|\n')
+            result.append(' ' * (shift1 + shift2) + str(
+                result_of_dividing_current_dividend) + ' ' * shift3 + '|\n')
         else:
             shift2 = 0
 
@@ -77,32 +84,46 @@ def long_division(dividend, divider):
 
         current_dividend %= divider
 
-        if current_dividend < divider and list_is_filled_with_zeros(digits_of_dividend[pos_of_next_digit:]):
-            return finish_forming_response(current_dividend, dividend, divider, result, shift1, shift2, shift3)
+        if current_dividend < divider and list_is_filled_with_zeros(
+                digits_of_dividend[pos_of_next_digit:]):
+            return finish_forming_response(current_dividend, dividend, divider,
+                                           result, shift1, shift2, shift3)
 
-        digits_of_dividend = (get_digits_of_number(current_dividend)
-                              if current_dividend != 0 else []) + digits_of_dividend[pos_of_next_digit:]
+        digits_of_dividend = \
+            (get_digits_of_number(current_dividend)
+             if current_dividend != 0
+             else []) \
+            + digits_of_dividend[pos_of_next_digit:]
 
         if list_is_filled_with_zeros(digits_of_dividend):
-            return finish_forming_response(current_dividend, dividend, divider, result, shift1, shift2, shift3)
+            return finish_forming_response(current_dividend, dividend, divider,
+                                           result, shift1, shift2, shift3)
 
 
-def change_shift1(digits_of_dividend, length_of_current_dividend, pos_of_next_digit, remainder_of_division, shift1):
-    shift1 += length_of_current_dividend - len(get_digits_of_number(remainder_of_division))
-    if remainder_of_division == 0 and not list_is_filled_with_zeros(digits_of_dividend[pos_of_next_digit:]):
+def change_shift1(digits_of_dividend, length_of_current_dividend,
+                  pos_of_next_digit, remainder_of_division, shift1):
+    shift1 += length_of_current_dividend - len(
+        get_digits_of_number(remainder_of_division))
+    if remainder_of_division == 0 and not list_is_filled_with_zeros(
+            digits_of_dividend[pos_of_next_digit:]):
         shift1 += len(get_digits_of_number(remainder_of_division))
     return shift1
 
 
-def get_next_dividend(current_dividend, digits_of_dividend, divider, pos_of_next_digit):
-    while current_dividend < divider and pos_of_next_digit < len(digits_of_dividend):
-        current_dividend = current_dividend * 10 + digits_of_dividend[pos_of_next_digit]
+def get_next_dividend(current_dividend, digits_of_dividend, divider,
+                      pos_of_next_digit):
+    while current_dividend < divider and pos_of_next_digit < len(
+            digits_of_dividend):
+        current_dividend = current_dividend * 10 + digits_of_dividend[
+            pos_of_next_digit]
         pos_of_next_digit += 1
     return current_dividend, pos_of_next_digit
 
 
-def finish_forming_response(current_dividend, dividend, divider, result, shift1, shift2, shift3):
-    result.append(' ' * (shift1 + shift2) + str(current_dividend) + ' ' * shift3)
+def finish_forming_response(current_dividend, dividend, divider, result,
+                            shift1, shift2, shift3):
+    result.append(
+        ' ' * (shift1 + shift2) + str(current_dividend) + ' ' * shift3)
     if result[1][-1] == '\n':
         result[1] = result[1][:-1]
     else:
