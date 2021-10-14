@@ -2,12 +2,19 @@
 from urllib import request
 
 
+_global_stat = None
+
+
 def make_stat(filename):
     """
     Функция вычисляет статистику по именам за каждый год с учётом пола.
     """
-    return parse_html_code(
-        get_html_code('http://shannon.usu.edu.ru/ftp/python/hw2/' + filename))
+    global _global_stat
+    if _global_stat is None:
+        _global_stat = parse_html_code(
+            get_html_code(
+                'http://shannon.usu.edu.ru/ftp/python/hw2/' + filename))
+    return _global_stat
 
 
 def extract_years(stat):
