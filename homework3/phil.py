@@ -6,6 +6,8 @@ from urllib.parse import quote, unquote
 from urllib.error import URLError, HTTPError
 
 BASE_URL = 'http://ru.wikipedia.org/wiki/'
+_pattern_for_links = re.compile(r'/wiki/([^#:.]+?)["\']', re.DOTALL)
+_content_of_articles = dict()
 
 
 def get_content(name: str):
@@ -42,10 +44,7 @@ def extract_links(page: str, begin: int, end: int):
     задающего позицию содержимого статьи на странице и возвращает все имеющиеся
     ссылки на другие вики-страницы без повторений и с учётом регистра.
     """
-    links = re.findall(
-        r'/wiki/([^#:.]+?)["\']',
-        page[begin:end],
-        flags=re.DOTALL)
+    links = re.findall(_pattern_for_links, page[begin:end])
     return set(map(lambda link: unquote(link), links))
 
 
@@ -75,7 +74,11 @@ def find_chain(start: str, finish: str):
 
 
 def get_links_in_article(article: str):
-    content = get_content(article)
+    try:
+        content = _content_of_articles[article]
+    except KeyError:
+        content = get_content(article)
+        _content_of_articles[article] = content
     if content is None:
         return None
     start_of_content, end_of_content = extract_content(content)
