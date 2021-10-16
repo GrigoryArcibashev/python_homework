@@ -8,7 +8,7 @@ from urllib.error import URLError, HTTPError
 BASE_URL = 'http://ru.wikipedia.org/wiki/'
 _pattern_for_links = re.compile(r'/wiki/([^#:.]+?)["\']', re.DOTALL)
 _pattern_for_content = re.compile(
-    r'["\']mw-content-text["\'].+?["\']catlinks["\']')
+    r'["\']mw-content-text["\'].+?["\']catlinks["\']', re.DOTALL)
 
 
 def get_content(name: str):
