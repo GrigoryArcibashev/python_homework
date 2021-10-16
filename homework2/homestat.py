@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from urllib import request
-
+from urllib.request import urlopen
+from urllib.error import URLError, HTTPError
 
 _global_stat = None
 
@@ -11,9 +11,12 @@ def make_stat(filename):
     """
     global _global_stat
     if _global_stat is None:
-        _global_stat = parse_html_code(
-            get_html_code(
-                'http://shannon.usu.edu.ru/ftp/python/hw2/' + filename))
+        url = 'http://shannon.usu.edu.ru/ftp/python/hw2/' + filename
+        page_content = get_page_content(url)
+        if page_content is None:
+            print('failed to download html page: {}'.format(url))
+            return None
+        _global_stat = parse_page_content(page_content)
     return _global_stat
 
 
@@ -120,18 +123,20 @@ def extract_year_female(stat, year):
         male_names=False)
 
 
-def get_html_code(url):
+def get_page_content(url):
     """
     Функция скачивает html-файл по указанному url,
     после чего возвращает его содержимое в виде строки
     """
-    file = request.urlopen(url)
-    html_code = file.read().decode('Windows-1251')
-    file.close()
-    return html_code
+    try:
+        with urlopen(url) as page:
+            content = page.read().decode('Windows-1251')
+        return content
+    except (URLError, HTTPError):
+        return None
 
 
-def parse_html_code(html_code):
+def parse_page_content(html_code):
     result = dict()
     current_year = None
     for line in html_code.split('\n'):
