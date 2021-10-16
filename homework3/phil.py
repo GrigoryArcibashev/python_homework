@@ -63,8 +63,6 @@ def find_chain(start: str, finish: str):
     articles.append(start)
     while len(articles) > 0:
         article = articles.popleft()
-        # if article == finish:
-        #     return make_chain(article, chains_of_links_of_articles)
         links_in_article = get_links_in_article(article)
         if links_in_article is None:
             continue
