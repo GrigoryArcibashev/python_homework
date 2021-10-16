@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 import re
 from collections import deque
-from itertools import groupby
 from urllib.request import urlopen
 from urllib.parse import quote, unquote
 from urllib.error import URLError, HTTPError
 
 BASE_URL = 'http://ru.wikipedia.org/wiki/'
 _pattern_for_links = re.compile(r'/wiki/([^#:.]+?)["\']', re.DOTALL)
-_pattern_for_content = re.compile(r'content-text.+?catlinks"')
-_content_of_articles = dict()
+_pattern_for_content = re.compile(
+    r'["\']mw-content-text["\'].+?["\']catlinks["\']')
 
 
 def get_content(name: str):
@@ -46,7 +45,7 @@ def extract_links(page: str, begin: int, end: int):
     ссылки на другие вики-страницы без повторений и с учётом регистра.
     """
     links = re.findall(_pattern_for_links, page[begin:end])
-    return [unquote(link) for link, _ in groupby(links)]
+    return set(map(lambda link: unquote(link), links))
 
 
 def find_chain(start: str, finish: str):
@@ -75,11 +74,7 @@ def find_chain(start: str, finish: str):
 
 
 def get_links_in_article(article: str):
-    try:
-        content = _content_of_articles[article]
-    except KeyError:
-        content = get_content(article)
-        _content_of_articles[article] = content
+    content = get_content(article)
     if content is None:
         return None
     start_of_content, end_of_content = extract_content(content)
