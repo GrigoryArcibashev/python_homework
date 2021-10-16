@@ -57,12 +57,14 @@ def find_chain(start: str, finish: str):
     """
     chains_of_links_of_articles = dict()
     chains_of_links_of_articles[start] = None
+    if start == finish:
+        return make_chain(start, chains_of_links_of_articles)
     articles = deque()
     articles.append(start)
     while len(articles) > 0:
         article = articles.popleft()
-        if article == finish:
-            return make_chain(article, chains_of_links_of_articles)
+        # if article == finish:
+        #     return make_chain(article, chains_of_links_of_articles)
         links_in_article = get_links_in_article(article)
         if links_in_article is None:
             continue
@@ -70,6 +72,8 @@ def find_chain(start: str, finish: str):
             if link not in chains_of_links_of_articles.keys():
                 articles.append(link)
                 chains_of_links_of_articles[link] = article
+                if link == finish:
+                    return make_chain(link, chains_of_links_of_articles)
     return None
 
 
