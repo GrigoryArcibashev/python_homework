@@ -8,7 +8,7 @@ from urllib.error import URLError, HTTPError
 BASE_URL = 'http://ru.wikipedia.org/wiki/'
 
 
-def get_content(name):
+def get_content(name: str):
     """
     Функция возвращает содержимое вики-страницы name из русской Википедии.
     В случае ошибки загрузки или отсутствия страницы возвращается None.
@@ -21,7 +21,7 @@ def get_content(name):
         return None
 
 
-def extract_content(page):
+def extract_content(page: str):
     """
     Функция принимает на вход содержимое страницы и возвращает 2-элементный
     tuple, первый элемент которого — номер позиции, с которой начинается
@@ -29,29 +29,27 @@ def extract_content(page):
     содержимое статьи.
     Если содержимое отсутствует, возвращается (0, 0).
     """
-    extracted_content = re.search(
-        r'<div id="bodyContent".*?<div id="mw-navigation"',
-        page,
-        flags=re.DOTALL | re.I)
-    return (extracted_content.start(), extracted_content.end()) \
-        if extracted_content is not None \
+    begin = page.find('"mw-content-text"')
+    end = page.rfind('"catlinks"')
+    return (begin, end) \
+        if begin != -1 and end != -1 \
         else (0, 0)
 
 
-def extract_links(page, begin, end):
+def extract_links(page: str, begin: int, end: int):
     """
     Функция принимает на вход содержимое страницы и начало и конец интервала,
     задающего позицию содержимого статьи на странице и возвращает все имеющиеся
     ссылки на другие вики-страницы без повторений и с учётом регистра.
     """
     links = re.findall(
-        r'<a.*?href=["\']/wiki/([^#:]+?)["\'].*?/a',
+        r'/wiki/([^#:.]+?)["\']',
         page[begin:end],
-        flags=re.DOTALL | re.I)
+        flags=re.DOTALL)
     return set(map(lambda link: unquote(link), links))
 
 
-def find_chain(start, finish):
+def find_chain(start: str, finish: str):
     """
     Функция принимает на вход название начальной и конечной статьи и возвращает
     список переходов, позволяющий добраться из начальной статьи в конечную.
@@ -60,8 +58,6 @@ def find_chain(start, finish):
     """
     chains_of_links_of_articles = dict()
     chains_of_links_of_articles[start] = None
-    viewed_articles = set()
-    viewed_articles.add(start)
     articles = deque()
     articles.append(start)
     while len(articles) > 0:
@@ -72,15 +68,13 @@ def find_chain(start, finish):
         if links_in_article is None:
             continue
         for link in links_in_article:
-            if link in viewed_articles:
-                continue
-            viewed_articles.add(link)
-            articles.append(link)
-            chains_of_links_of_articles[link] = article
+            if link not in chains_of_links_of_articles.keys():
+                articles.append(link)
+                chains_of_links_of_articles[link] = article
     return None
 
 
-def get_links_in_article(article):
+def get_links_in_article(article: str):
     content = get_content(article)
     if content is None:
         return None
@@ -88,7 +82,7 @@ def get_links_in_article(article):
     return extract_links(content, start_of_content, end_of_content)
 
 
-def make_chain(article, chains_of_links_of_articles):
+def make_chain(article: str, chains_of_links_of_articles: dict):
     chain = [article]
     article = chains_of_links_of_articles[article]
     while article is not None:
