@@ -117,7 +117,7 @@ class TestChainFinder(unittest.TestCase):
 
     def test_start_case_insensitivity(self):
         self._check('Математика')
-        # self._check('математика')
+        self._check('математика')
 
     def test_something(self):
         self._check('Архимед')

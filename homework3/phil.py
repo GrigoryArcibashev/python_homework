@@ -7,6 +7,7 @@ from urllib.error import URLError, HTTPError
 
 BASE_URL = 'http://ru.wikipedia.org/wiki/'
 _pattern_for_links = re.compile(r'/wiki/([^#:.]+?)["\']', re.DOTALL)
+_pattern_for_content = re.compile(r'content-text.+?catlinks"')
 
 
 def get_content(name: str):
@@ -30,10 +31,9 @@ def extract_content(page: str):
     содержимое статьи.
     Если содержимое отсутствует, возвращается (0, 0).
     """
-    begin = page.find('"mw-content-text"')
-    end = page.rfind('"catlinks"')
-    return (begin, end) \
-        if begin != -1 and end != -1 \
+    extracted_content = re.search(_pattern_for_content, page)
+    return (extracted_content.start(), extracted_content.end()) \
+        if extracted_content is not None \
         else (0, 0)
 
 
