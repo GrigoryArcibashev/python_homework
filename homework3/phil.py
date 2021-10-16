@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import re
 from collections import deque
+from itertools import groupby
 from urllib.request import urlopen
 from urllib.parse import quote, unquote
 from urllib.error import URLError, HTTPError
@@ -44,7 +45,7 @@ def extract_links(page: str, begin: int, end: int):
     ссылки на другие вики-страницы без повторений и с учётом регистра.
     """
     links = re.findall(_pattern_for_links, page[begin:end])
-    return set(map(lambda link: unquote(link), links))
+    return [unquote(link) for link, _ in groupby(links)]
 
 
 def find_chain(start: str, finish: str):
