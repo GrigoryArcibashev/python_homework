@@ -9,6 +9,7 @@ from urllib.error import URLError, HTTPError
 BASE_URL = 'http://ru.wikipedia.org/wiki/'
 _pattern_for_links = re.compile(r'/wiki/([^#:.]+?)["\']', re.DOTALL)
 _pattern_for_content = re.compile(r'content-text.+?catlinks"')
+_content_of_articles = dict()
 
 
 def get_content(name: str):
@@ -74,7 +75,11 @@ def find_chain(start: str, finish: str):
 
 
 def get_links_in_article(article: str):
-    content = get_content(article)
+    try:
+        content = _content_of_articles[article]
+    except KeyError:
+        content = get_content(article)
+        _content_of_articles[article] = content
     if content is None:
         return None
     start_of_content, end_of_content = extract_content(content)
