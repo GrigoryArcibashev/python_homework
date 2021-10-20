@@ -3,6 +3,11 @@ from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
 
 _global_stat = None
+MALE_ENDINGS_FOR_LAST_NAME = ('ов', 'ев', 'ёв', 'ын', 'ин', 'ский', 'цкий')
+MALE_ENDINGS_FOR_FIRST_NAME = ('ёва', 'ий', 'рь', 'ман', 'рилл', 'дро',
+                                'ег', 'он', 'ел', 'фей', 'ндр', 'ий', 'ил',
+                                'ей', 'ём', 'тор', 'ис', 'ван', 'дим',
+                                'сей', 'лав', 'еб', 'сим', 'лай')
 
 
 def make_stat(filename):
@@ -165,25 +170,27 @@ def is_sex_male(last_name, first_name):
         True, если пол мужской,
         False, если пол женский
     """
-    male_endings_for_last_name = ('ов', 'ев', 'ёв', 'ын', 'ин', 'ский', 'цкий')
-    male_endings_for_first_name = ('ёва', 'ий', 'рь', 'ман', 'рилл', 'дро',
-                                   'ег', 'он', 'ел', 'фей', 'ндр', 'ий', 'ил',
-                                   'ей', 'ём', 'тор', 'ис', 'ван', 'дим',
-                                   'сей', 'лав', 'еб', 'сим', 'лай')
+    return is_last_name_male(last_name) or is_first_name_male(first_name)
+
+
+def is_last_name_male(last_name):
     is_last_name_male = False
-    for ending in male_endings_for_last_name:
+    for ending in MALE_ENDINGS_FOR_LAST_NAME:
         if len(last_name) >= len(ending) \
                 and last_name[-len(ending):] == ending:
             is_last_name_male = True
             break
+    return is_last_name_male
 
+
+def is_first_name_male(first_name):
     is_first_name_male = False
-    for ending in male_endings_for_first_name:
+    for ending in MALE_ENDINGS_FOR_FIRST_NAME:
         if len(first_name) >= len(ending) \
                 and first_name[-len(ending):] == ending:
             is_first_name_male = True
             break
-    return is_last_name_male or is_first_name_male
+    return is_first_name_male
 
 
 if __name__ == '__main__':
