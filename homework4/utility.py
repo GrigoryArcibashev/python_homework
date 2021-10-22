@@ -7,13 +7,15 @@ from enum import Enum
 MODES = Enum('MODES', 'POPRES POPUSER HELP')
 
 
-def read_arguments():
+def get_arguments():
     """
     Возвращает путь до файла с логами и режим работы
     """
     arguments = sys.argv[1:]
     check_arguments_for_errors(arguments)
-    return arguments[0], get_mode_by_name(arguments[1])
+    if len(arguments) > 1:
+        return arguments[0], get_mode_by_name(arguments[1])
+    return None, get_mode_by_name(arguments[0])
 
 
 def check_arguments_for_errors(arguments: list):
@@ -23,13 +25,22 @@ def check_arguments_for_errors(arguments: list):
     if len(arguments) == 0:
         report_error('Не указан путь до файла с логами', 1)
     elif len(arguments) == 1:
-        report_error('Не указан режим работы утилиты', 1)
-    filepath = str(arguments[0])
+        mode = get_mode_by_name(arguments[0])
+        if mode is MODES.HELP:
+            return
+        elif mode is None:
+            report_error('Не указан режим работы утилиты', 1)
+        else:
+            report_error('Не указан путь до файла с логами', 1)
+    mode_name = arguments[1]
+    mode = get_mode_by_name(mode_name)
+    if mode is None:
+        report_error('Неизвестный параметр {}\n'.format(mode_name), 1)
+    elif mode is MODES.HELP:
+        return
+    filepath = arguments[0]
     if not (os.path.exists(filepath) and os.path.isfile(filepath)):
-        report_error('Файл %s не найден.' % filepath, 1)
-    mode = str(arguments[1])
-    if mode.upper() not in [m.name for m in MODES]:
-        report_error('Неизвестный параметр %s.\n' % mode, 1)
+        report_error('Файл {} не найден'.format(filepath), 1)
 
 
 def report_error(error_message: str, error_code: int):
@@ -47,39 +58,83 @@ def get_mode_by_name(mode_name: str):
     """
     Возвращает элемент перечисления MODES по имени
     """
-    mode_name = mode_name.upper()
+    mode_name = mode_name.lower()
     for mode in MODES:
-        if mode.name == mode_name:
+        if mode.name.lower() == mode_name:
             return mode
     return None
 
 
-def get_next_lines(max_bytes: int):
-    pass
+def get_lines_from_file(file_path: str, start_byte: int, max_bytes: int):
+    with open(file_path, 'r') as file:
+        file.seek(start_byte)
+        start_outside_file = not bool(file.read(1))
+        if start_outside_file:
+            return None
+        file.seek(file.tell() - 1)
+        t = file.tell()
+        while t > 0 and file.read(1) != '\n':
+            file.seek(t - 2)
+            t = file.tell()
+        if file.read(1) != '\n':
+            file.seek(file.tell() - 1)
+        t = file.tell()
+        read = file.read(max_bytes)
+        if '\n' in read or len(read) <= max_bytes:
+            lines = read.split('\n')
+        else:
+            lines = ''
+        lines = list(filter(lambda line: len(line) > 0, lines))
+        if len(lines) > 0 \
+                and lines[-1][-1] != '\n' \
+                and not len(read) <= max_bytes:
+            # file.seek(file.tell() - len(lines[-1]) + 1)
+            lines = lines[:-1]
+        return list(
+            map(lambda line: line.strip(), lines)), start_byte + max_bytes
 
 
 def find_most_popular_resource():
-    pass
+    return None
 
 
 def find_most_active_user():
-    pass
+    return None
 
 
 def get_help():
-    return \
-        """a"""
+    return """
+    Утилита, которая по данному логу, согласно параметрам, выдаёт одну 
+    из статистик: самый популярный ресурс и самый активный клиент.
+    
+    python {0} [path_to_log_file] help
+       Помощь по использованию утилиты
+       Если лог указан, он игнорируется
+    
+    python {0} path_to_log_file popres
+        Выдать самый популярный ресурс
+        
+    python {0} path_to_log_file popuser
+        Выдать самого активного клиента
+    """.format(sys.argv[0])
 
 
 def main():
-    file_path, mode = read_arguments()
+    file_path, mode = get_arguments()
     if mode is MODES.POPRES:
-        find_most_popular_resource()
+        result = find_most_popular_resource()
+        print(result if result is not None else 'Не удалось выполнить команду')
     elif mode is MODES.POPUSER:
-        find_most_active_user()
+        result = find_most_active_user()
+        print(result if result is not None else 'Не удалось выполнить команду')
     else:
         print(get_help())
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    c = 0
+    lns, c = get_lines_from_file('t.txt', c, 15)
+    while lns is not None:
+        lns, c = get_lines_from_file('t.txt', c, 15)
+        print(lns)
