@@ -3,7 +3,7 @@ import os.path
 import sys
 from enum import Enum
 
-MODES = Enum('MODES', 'POPRES POPUSER HELP')
+MODES = Enum('MODES', 'POPULAR_RESOURCE POPULAR_USER HELP')
 
 
 def get_arguments():
@@ -39,7 +39,7 @@ def check_arguments_for_errors(arguments: list):
         return
     filepath = arguments[0]
     if not (os.path.exists(filepath) and os.path.isfile(filepath)):
-        report_error('Файл {} не найден'.format(filepath), 1)
+        report_error('Файл {} не найден'.format(filepath), 2)
 
 
 def report_error(error_message: str, error_code: int):
@@ -47,10 +47,10 @@ def report_error(error_message: str, error_code: int):
     Информирует об оишбке, после чего аварийно завершает выполнение программы
     """
     print(
-        '%s.\n' % error_message +
-        'Подробнее об использовании утилиты ' +
-        'можно узнать с помощью команды help:\n' +
-        'python %s help' % sys.argv[0])
+            '%s.\n' % error_message +
+            'Об использовании утилиты можно ' +
+            'узнать с помощью команды help:\n' +
+            'python %s help' % sys.argv[0])
     exit(error_code)
 
 
@@ -73,17 +73,21 @@ def read_lines(file_path: str, start_byte: int, max_bytes: int):
     чья суммарная длина состовялет не меньше max_bytes.
     """
     with open(file_path, 'r', encoding='cp1251') as file:
+        def safe_line_reading():
+            try:
+                return file.readline()
+            except UnicodeDecodeError:
+                report_error('Ошибка при чтении файла с логами', 3)
+
         file.seek(start_byte)
         lines = list()
         number_of_bytes_read = 0
-        line = file.readline()
+        line = safe_line_reading()
         while line and number_of_bytes_read < max_bytes:
             lines.append(line)
             number_of_bytes_read += len(line)
-            line = file.readline()
-        if lines:
-            return lines, start_byte + number_of_bytes_read
-        return None, start_byte
+            line = safe_line_reading()
+        return lines if lines else None, start_byte + number_of_bytes_read
 
 
 def find_most_popular_resource(file_path: str):
@@ -113,9 +117,9 @@ def get_max_of_column_from_file(file_path: str, column_number: int):
     while lines is not None:
         for line in lines:
             columns = list(
-                filter(
-                    lambda l: len(l) > 0,
-                    map(lambda l: l.strip(), line.split(','))))
+                    filter(
+                            lambda l: len(l) > 0,
+                            map(lambda l: l.strip(), line.split(','))))
             if len(columns) == 15:
                 try:
                     stat[columns[column_number]] += 1
@@ -137,24 +141,29 @@ def get_help():
        Помощь по использованию утилиты
        Если лог указан, он игнорируется
     
-    python {0} path_to_log_file popres
+    python {0} path_to_log_file popular_resource
         Выдать самый популярный ресурс
         
-    python {0} path_to_log_file popuser
+    python {0} path_to_log_file popular_user
         Выдать самого активного клиента
     """.format(sys.argv[0])
 
 
+def print_result_of_work(result: str):
+    if result:
+        print(result)
+    else:
+        report_error('Не удалось получить результат', 0)
+
+
 def main():
     file_path, mode = get_arguments()
-    if mode is MODES.POPRES:
-        result = find_most_popular_resource(file_path)
-        print(result if result is not None else 'Не удалось выполнить команду')
-    elif mode is MODES.POPUSER:
-        result = find_most_active_user(file_path)
-        print(result if result is not None else 'Не удалось выполнить команду')
+    if mode is MODES.POPULAR_RESOURCE:
+        print_result_of_work(find_most_popular_resource(file_path))
+    elif mode is MODES.POPULAR_USER:
+        print_result_of_work(find_most_active_user(file_path))
     else:
-        print(get_help())
+        print_result_of_work(get_help())
 
 
 if __name__ == '__main__':
