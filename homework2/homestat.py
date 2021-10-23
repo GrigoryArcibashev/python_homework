@@ -5,9 +5,9 @@ from urllib.error import URLError, HTTPError
 _global_stat = None
 MALE_ENDINGS_FOR_LAST_NAME = ('ов', 'ев', 'ёв', 'ын', 'ин', 'ский', 'цкий')
 MALE_ENDINGS_FOR_FIRST_NAME = ('ёва', 'ий', 'рь', 'ман', 'рилл', 'дро',
-                                'ег', 'он', 'ел', 'фей', 'ндр', 'ий', 'ил',
-                                'ей', 'ём', 'тор', 'ис', 'ван', 'дим',
-                                'сей', 'лав', 'еб', 'сим', 'лай')
+                               'ег', 'он', 'ел', 'фей', 'ндр', 'ий', 'ил',
+                               'ей', 'ём', 'тор', 'ис', 'ван', 'дим',
+                               'сей', 'лав', 'еб', 'сим', 'лай')
 
 
 def make_stat(filename):
@@ -40,8 +40,8 @@ def extract_general(stat):
     Список должен быть отсортирован по убыванию количества.
     """
     return get_frequency_of_names_for_years_in_descending_order(
-        stat,
-        stat.keys())
+            stat,
+            stat.keys())
 
 
 def get_frequency_of_names_for_years_in_descending_order(
@@ -63,9 +63,9 @@ def get_frequency_of_names_for_years_in_descending_order(
             except KeyError:
                 name_counter[name[0]] = 1
     return sorted(
-        list(name_counter.items()),
-        key=lambda pair: pair[1],
-        reverse=True)
+            list(name_counter.items()),
+            key=lambda pair: pair[1],
+            reverse=True)
 
 
 def extract_general_male(stat):
@@ -75,9 +75,9 @@ def extract_general_male(stat):
     Список должен быть отсортирован по убыванию количества.
     """
     return get_frequency_of_names_for_years_in_descending_order(
-        stat,
-        stat.keys(),
-        female_names=False)
+            stat,
+            stat.keys(),
+            female_names=False)
 
 
 def extract_general_female(stat):
@@ -87,9 +87,9 @@ def extract_general_female(stat):
     Список должен быть отсортирован по убыванию количества.
     """
     return get_frequency_of_names_for_years_in_descending_order(
-        stat,
-        stat.keys(),
-        male_names=False)
+            stat,
+            stat.keys(),
+            male_names=False)
 
 
 def extract_year(stat, year):
@@ -110,9 +110,9 @@ def extract_year_male(stat, year):
     Список должен быть отсортирован по убыванию количества.
     """
     return get_frequency_of_names_for_years_in_descending_order(
-        stat,
-        [year],
-        female_names=False)
+            stat,
+            [year],
+            female_names=False)
 
 
 def extract_year_female(stat, year):
@@ -123,9 +123,9 @@ def extract_year_female(stat, year):
     Список должен быть отсортирован по убыванию количества.
     """
     return get_frequency_of_names_for_years_in_descending_order(
-        stat,
-        [year],
-        male_names=False)
+            stat,
+            [year],
+            male_names=False)
 
 
 def get_page_content(url):
@@ -174,23 +174,23 @@ def is_sex_male(last_name, first_name):
 
 
 def is_last_name_male(last_name):
-    is_last_name_male = False
+    result = False
     for ending in MALE_ENDINGS_FOR_LAST_NAME:
         if len(last_name) >= len(ending) \
                 and last_name[-len(ending):] == ending:
-            is_last_name_male = True
+            result = True
             break
-    return is_last_name_male
+    return result
 
 
 def is_first_name_male(first_name):
-    is_first_name_male = False
+    result = False
     for ending in MALE_ENDINGS_FOR_FIRST_NAME:
         if len(first_name) >= len(ending) \
                 and first_name[-len(ending):] == ending:
-            is_first_name_male = True
+            result = True
             break
-    return is_first_name_male
+    return result
 
 
 if __name__ == '__main__':
