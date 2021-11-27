@@ -9,9 +9,9 @@ from typing import NamedTuple
 
 
 class TarParser:
-    _HEADER_FMT1 = '100s8s8s8s12s12s8sc100s255s'
-    _HEADER_FMT2 = '6s2s32s32s8s8s155s12s'
-    _HEADER_FMT3 = '6s2s32s32s8s8s12s12s112s31x'
+    _HEADER_FMT1 = '100s8s8s8s12s12s8sc100s255s'  # 10(9)8
+    _HEADER_FMT2 = '6s2s32s32s8s8s155s12s'  # 8   15
+    _HEADER_FMT3 = '6s2s32s32s8s8s12s12s112s31x'  # 10
     _READ_BLOCK = 16 * 2 ** 20
     _RECORD_SIZE = 512
 
@@ -38,14 +38,14 @@ class TarParser:
         Открывает tar-архив 'filename' и производит его предобработку
         (если требуется)
         """
-        self.archive_name = filename
-        self.files_stat = dict()
+        self._archive_name = filename
+        self._files_stat = dict()
         with open(filename, 'rb') as arch:
             record = arch.read(self._RECORD_SIZE)
             while self._decode(record):
                 header = self._get_full_header(record)
                 if self._FILE_TYPES[header[7]] == 'Regular file':
-                    self.files_stat[self._decode(header[0])] = header
+                    self._files_stat[self._decode(header[0])] = header
                 file_size = convert_to_dec_from_oct(self._decode(header[4]))
                 if file_size % self._RECORD_SIZE != 0:
                     file_size += \
@@ -58,20 +58,20 @@ class TarParser:
         Распаковывает данный tar-архив в каталог 'dest'
         """
 
-        with open(self.archive_name, 'rb') as arch:
+        with open(self._archive_name, 'rb') as arch:
             record = arch.read(self._RECORD_SIZE)
             while self._decode(record):
                 header = self._get_full_header(record)
                 filename = self._decode(header[0])
                 file_size = convert_to_dec_from_oct(self._decode(header[4]))
-
                 path = Path(dest + '\\' + filename)
                 if self._FILE_TYPES[header[7]] == 'Directory':
                     Path.mkdir(path)
+                    arch.seek(file_size, 1)
                 else:
                     with open(path, 'wb') as file:
-                        file.write(arch.read(file_size))
-
+                        r = arch.read(file_size)
+                        file.write(r.strip(b'\x00'))
                 if file_size % self._RECORD_SIZE != 0:
                     arch.seek(
                             self._RECORD_SIZE - file_size % self._RECORD_SIZE,
@@ -82,7 +82,7 @@ class TarParser:
         """
         Возвращает итератор имён файлов (с путями) в архиве
         """
-        for filename in list(self.files_stat.keys()):
+        for filename in self._files_stat.keys():
             yield filename
 
     def file_stat(self, filename):
@@ -121,7 +121,7 @@ class TarParser:
         elif header_part2.startswith(b'ustar '):
             header_part2 = struct.unpack(self._HEADER_FMT3, header_part2)
         else:
-            return headers
+            return headers[:-1]
         return headers[:-1] + header_part2
 
     @staticmethod
