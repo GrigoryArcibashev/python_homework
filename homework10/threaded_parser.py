@@ -77,6 +77,8 @@ class Scraper:
                     target=self._handle_articles, args=(out_dir,))
             th.start()
             pool.append(th)
+        # Так можно сгенерировать случайный сигнал
+        # throw_random_signal()
         for th in pool:
             th.join()
 
